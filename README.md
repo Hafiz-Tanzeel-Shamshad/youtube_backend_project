@@ -1,42 +1,44 @@
+
 # YouTube Project Backend
 
-This is a Node.js backend project for a YouTube-like application, built with Express, MongoDB (Mongoose), and several supporting libraries. It provides user registration, video management, and basic API structure.
+This is a Node.js backend project for a YouTube-like application, built with Express, MongoDB (Mongoose), JWT authentication, Multer, and Cloudinary. It provides user registration, login, logout, token refresh, video management, and robust error handling.
 
 ## Features
-- User registration API
+- User registration, login, logout, and token refresh APIs
 - Video model and management
 - MongoDB connection using Mongoose
-- Error handling middleware
+- JWT authentication and refresh tokens
 - File uploads (Multer)
 - Cloudinary integration for media storage
-- JWT authentication (setup in models)
+- Error handling middleware and custom error class
 - CORS and cookie support
 
 ## Project Structure
 ```
 ├── package.json
 ├── public/
-│   └── temp/
+│   └── temp/                  # Temporary storage for uploads
 ├── src/
-│   ├── app.js              # Express app setup and middleware
-│   ├── constants.js        # Project constants (DB name)
-│   ├── index.js            # Entry point, server start, DB connect
+│   ├── app.js                 # Express app setup and middleware
+│   ├── constants.js           # Project constants (DB name)
+│   ├── index.js               # Entry point, server start, DB connect
 │   ├── controllers/
-│   │   └── user.controller.js   # User registration controller
+│   │   └── user.controller.js # User registration, login, logout, refresh
 │   ├── db/
-│   │   └── index.js        # MongoDB connection logic
+│   │   └── index.js           # MongoDB connection logic
 │   ├── middlewares/
-│   │   └── multer.middleware.js # Multer config for uploads
+│   │   ├── multer.middleware.js # Multer config for uploads
+│   │   └── auth.middleware.js   # JWT authentication middleware
 │   ├── models/
-│   │   ├── user.model.js   # User schema/model
-│   │   └── video.model.js  # Video schema/model
+│   │   ├── user.model.js      # User schema/model
+│   │   └── video.model.js     # Video schema/model
 │   ├── routes/
-│   │   └── user.routes.js  # User API routes
+│   │   └── user.routes.js     # User API routes
 │   └── utils/
-│       ├── ApiErrors.js    # Custom error class
-│       ├── ApiResponse.js  # Standard API response class
-│       ├── asyncHandler.js # Async error handler wrapper
-│       └── cloudinary.js   # Cloudinary config
+│       ├── ApiError.js        # Custom error class
+│       ├── ApiResponse.js     # Standard API response class
+│       ├── asyncHandler.js    # Async error handler wrapper
+│       └── cloudinary.js      # Cloudinary config and upload utility
 ```
 
 ## Getting Started
@@ -60,7 +62,10 @@ This is a Node.js backend project for a YouTube-like application, built with Exp
    CLOUDINARY_CLOUD_NAME=your_cloud_name
    CLOUDINARY_API_KEY=your_api_key
    CLOUDINARY_API_SECRET=your_api_secret
-   JWT_SECRET=your_jwt_secret
+   ACCESS_TOKEN_SECRET=your_access_token_secret
+   ACCESS_TOKEN_EXPIRY=1d
+   REFRESH_TOKEN_SECRET=your_refresh_token_secret
+   REFRESH_TOKEN_EXPIRY=7d
    ```
 
 ### Running the Server
@@ -70,21 +75,66 @@ npm run dev
 Server will start on the port specified in `.env` (default: 8000).
 
 ## API Endpoints
+
 ### User
-- `POST /api/v1/users/register` — Register a new user
+- `POST /api/v1/users/register` — Register a new user (with avatar and optional cover image upload)
+- `POST /api/v1/users/login` — Login user (returns access and refresh tokens)
+- `POST /api/v1/users/logout` — Logout user (requires JWT)
+- `POST /api/v1/users/refresh-token` — Refresh access token (requires refresh token)
 
 ## Models
+
 ### User
-- `username`, `email`, `fullName`, `avatar`, `coverImage`, `watchHistory`, etc.
+- `username`: String, required, unique
+- `email`: String, required, unique
+- `fullName`: String, required
+- `avatar`: String (Cloudinary URL), required
+- `coverImage`: String (Cloudinary URL), optional
+- `watchHistory`: Array of Video references
+- `password`: String, hashed
+- `refreshToken`: String
+
+#### User Methods
+- `isPasswordCorrect(password)`: Checks password
+- `generateAccessToken()`: Returns JWT access token
+- `generateRefreshToken()`: Returns JWT refresh token
 
 ### Video
-- `videoFile`, `thumbnail`, `title`, `description`, `duration`, `views`, `ispublished`, `owner`
+- `videoFile`: String (Cloudinary URL), required
+- `thumbnail`: String (Cloudinary URL), required
+- `title`: String, required
+- `description`: String, required
+- `duration`: String, required
+- `views`: Number, default 0
+- `ispublished`: Boolean, default true
+- `owner`: User reference
+
+## Middleware
+
+- **auth.middleware.js**: Verifies JWT, attaches user to request
+- **multer.middleware.js**: Handles file uploads to `public/temp`
 
 ## Utilities
-- **asyncHandler**: Wraps async route handlers for error handling
-- **ApiErrors**: Custom error class
-- **ApiResponse**: Standard API response format
-- **cloudinary.js**: Cloudinary configuration
+
+- **asyncHandler.js**: Wraps async route handlers for error handling
+- **ApiError.js**: Custom error class for API errors
+- **ApiResponse.js**: Standard API response format
+- **cloudinary.js**: Cloudinary configuration and upload utility
+
+## Error Handling
+
+- All async routes are wrapped with `asyncHandler` for proper error propagation
+- Custom errors are thrown using `ApiError` and returned in a consistent format
+
+## Authentication
+
+- JWT-based authentication for protected routes
+- Access and refresh tokens are managed securely
+- User passwords are hashed using bcrypt
+
+## File Uploads
+
+- Uses Multer to handle file uploads, storing them temporarily in `public/temp` before uploading to Cloudinary
 
 ## License
 ISC
