@@ -1,0 +1,30 @@
+import { User } from "../models/user.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import jwt from 'jsonwebtoken';
+
+export const verifyJWT = asyncHandler( async (req, res, next)=>{
+    try {
+        const token = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
+    
+        if(!token) {
+            throw new ApiError(401, "No token provided");
+        }
+    
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    
+        if(!decodedToken) {
+            throw new ApiError(401, "Invalid token");
+        }
+    
+        const user = await User.findById(decodedToken._id).select("-password -refreshToken");
+    
+        if(!user){
+            throw new ApiError(401, "User not found");
+        }
+    
+        req.user = user; // Attach user to request why? 
+        next();
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Unauthorized");
+    }
+})
