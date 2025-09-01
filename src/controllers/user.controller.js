@@ -237,7 +237,7 @@ const getCurrentUser = asyncHandler(async(req, res) => {
 });
 
 const updateAccountDetails = asyncHandler((req, res) => {
-    const {email, fullName} = req.body;
+    const {fullName, email} = req.body;
 
     if(!email || !fullName){
         throw new ApiError(400, "All fields are required")
@@ -266,9 +266,7 @@ const updateUserAvatarImage = asyncHandler(async (req, res) => {
     if (!avatarLocalPath) {
         throw new ApiError(400, "avatar file is missing");
     }
-
-    const avatar =  await uploadOnCloudinary(avatarLocalPath);
-
+    // delete old avatar image
     if(!avatar.url){
         throw new ApiError(400,"Error while uploading on avatar image");
     }
