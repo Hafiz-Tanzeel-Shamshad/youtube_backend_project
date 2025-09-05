@@ -3,7 +3,7 @@ import {ApiError} from "../utils/ApiError.js";
 import {User} from "../models/user.model.js";
 import {uploadOnCloudinary} from "../utils/cloudinary.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
-import { mongo } from "mongoose";
+import  mongoose  from "mongoose";
 
 
 const generateAccessAndRefreshToken = async (userId)=>{
@@ -393,7 +393,8 @@ const getUserChannelProfile  = asyncHandler( async(req, res) => {
 });
 
 const getWatchHistory = asyncHandler(async (req, res) => {
-    const user = User.aggregate([
+
+    const user = await User.aggregate([
         { 
             $match: {
                 _id: new mongoose.Types.ObjectId(req.user._id)
@@ -419,20 +420,20 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                                         username: 1,
                                         avatar: 1
                                     }
-                                },
-                                {
-                                    $addFields: {
-                                        owner: { 
-                                            $arrayElemAt: ["$owner", 0] 
-                                        }
-                                    }
                                 }
                             ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: { 
+                                $arrayElemAt: ["$owner", 0] 
+                            }
                         }
                     }
                 ]
             }
-        }
+       }
     ]);
 
     res
