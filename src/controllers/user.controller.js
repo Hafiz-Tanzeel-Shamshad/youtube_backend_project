@@ -226,7 +226,7 @@ const changeCurrentPassword = asyncHandler(async(req, res) => {
     user.save({validateBeforeSave: false});
 
     res.status(200)
-    .json(ApiResponse(200,{},"New password sucessfully changed!"))
+    .json(new ApiResponse(200,{},"New password sucessfully changed!"))
 
 
 });
@@ -339,7 +339,7 @@ const getUserChannelProfile  = asyncHandler( async(req, res) => {
                 from: "subscriptions",
                 localField: "_id",
                 foreignField: "channel",
-                as: "subscripers"
+                as: "subscribers"
             }
         },
         {
@@ -353,14 +353,14 @@ const getUserChannelProfile  = asyncHandler( async(req, res) => {
         {
             $addFields: {
                 subscribersCount: {
-                    $size: "$subscripers"
+                    $size: "$subscribers"
                 },
                 channelSubscribedToCount: {
-                    $size: "subscribedTo"
+                    $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: {
-                        if: {$in: [req.user._id, "subscribers.subscriber"]},
+                        if: {$in: [req.user._id, "$subscribers.subscriber"]},
                         then: true,
                         else: false
                     }
