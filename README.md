@@ -1,15 +1,21 @@
 
 # YouTube Project Backend
 
-This is a Node.js backend project for a YouTube-like application, built with Express, MongoDB (Mongoose), JWT authentication, Multer, and Cloudinary. It provides user registration, login, logout, token refresh, video management, and robust error handling.
+This is a professional Node.js backend for a YouTube-like application, built with Express, MongoDB (Mongoose), JWT authentication, Multer, and Cloudinary. It provides a robust API for user management, video publishing, comments, likes, playlists, subscriptions, tweets, and more.
 
 ## Features
 - User registration, login, logout, and token refresh APIs
-- Video model and management
+- Video publishing, updating, deleting, and listing
+- Commenting on videos, updating, and deleting comments
+- Like/unlike videos, comments, and tweets
+- Playlist creation, update, deletion, and video management
+- Channel subscription management
+- Tweet creation, update, deletion, and listing
+- Dashboard stats and video listing for channels
+- Healthcheck endpoint
 - MongoDB connection using Mongoose
 - JWT authentication and refresh tokens
-- File uploads (Multer)
-- Cloudinary integration for media storage
+- File uploads (Multer) and Cloudinary integration
 - Error handling middleware and custom error class
 - CORS and cookie support
 
@@ -22,18 +28,23 @@ This is a Node.js backend project for a YouTube-like application, built with Exp
 │   ├── app.js                 # Express app setup and middleware
 │   ├── constants.js           # Project constants (DB name)
 │   ├── index.js               # Entry point, server start, DB connect
-│   ├── controllers/
-│   │   └── user.controller.js # User registration, login, logout, refresh
+│   ├── controllers/           # All business logic for routes
 │   ├── db/
 │   │   └── index.js           # MongoDB connection logic
 │   ├── middlewares/
 │   │   ├── multer.middleware.js # Multer config for uploads
 │   │   └── auth.middleware.js   # JWT authentication middleware
-│   ├── models/
-│   │   ├── user.model.js      # User schema/model
-│   │   └── video.model.js     # Video schema/model
-│   ├── routes/
-│   │   └── user.routes.js     # User API routes
+│   ├── models/                # Mongoose models (User, Video, etc.)
+│   ├── routes/                # All API route definitions
+│   │   ├── comment.routes.js
+│   │   ├── dashboard.routes.js
+│   │   ├── healthcheck.routes.js
+│   │   ├── like.routes.js
+│   │   ├── playlist.routes.js
+│   │   ├── subscription.routes.js
+│   │   ├── tweet.routes.js
+│   │   ├── user.routes.js
+│   │   └── video.routes.js
 │   └── utils/
 │       ├── ApiError.js        # Custom error class
 │       ├── ApiResponse.js     # Standard API response class
@@ -81,6 +92,53 @@ Server will start on the port specified in `.env` (default: 8000).
 - `POST /api/v1/users/login` — Login user (returns access and refresh tokens)
 - `POST /api/v1/users/logout` — Logout user (requires JWT)
 - `POST /api/v1/users/refresh-token` — Refresh access token (requires refresh token)
+
+### Video
+- `GET /api/v1/videos/` — List all videos
+- `POST /api/v1/videos/` — Publish a new video (with file upload)
+- `GET /api/v1/videos/:videoId` — Get video by ID
+- `PATCH /api/v1/videos/:videoId` — Update video (with thumbnail upload)
+- `DELETE /api/v1/videos/:videoId` — Delete video
+- `PATCH /api/v1/videos/toggle/publish/:videoId` — Toggle publish status
+
+### Comment
+- `GET /api/v1/comments/:videoId` — Get comments for a video
+- `POST /api/v1/comments/:videoId` — Add comment to a video
+- `PATCH /api/v1/comments/c/:commentId` — Update a comment
+- `DELETE /api/v1/comments/c/:commentId` — Delete a comment
+
+### Like
+- `POST /api/v1/likes/toggle/v/:videoId` — Like/unlike a video
+- `POST /api/v1/likes/toggle/c/:commentId` — Like/unlike a comment
+- `POST /api/v1/likes/toggle/t/:tweetId` — Like/unlike a tweet
+- `GET /api/v1/likes/videos` — Get liked videos
+
+### Playlist
+- `POST /api/v1/playlists/` — Create a playlist
+- `GET /api/v1/playlists/:playlistId` — Get playlist by ID
+- `PATCH /api/v1/playlists/:playlistId` — Update playlist
+- `DELETE /api/v1/playlists/:playlistId` — Delete playlist
+- `PATCH /api/v1/playlists/add/:videoId/:playlistId` — Add video to playlist
+- `PATCH /api/v1/playlists/remove/:videoId/:playlistId` — Remove video from playlist
+- `GET /api/v1/playlists/user/:userId` — Get all playlists for a user
+
+### Subscription
+- `GET /api/v1/subscriptions/c/:channelId` — Get subscribed channels
+- `POST /api/v1/subscriptions/c/:channelId` — Subscribe/unsubscribe to a channel
+- `GET /api/v1/subscriptions/u/:subscriberId` — Get channel subscribers
+
+### Tweet
+- `POST /api/v1/tweets/` — Create a tweet
+- `GET /api/v1/tweets/user/:userId` — Get tweets for a user
+- `PATCH /api/v1/tweets/:tweetId` — Update a tweet
+- `DELETE /api/v1/tweets/:tweetId` — Delete a tweet
+
+### Dashboard
+- `GET /api/v1/dashboard/stats` — Get channel stats
+- `GET /api/v1/dashboard/videos` — Get channel videos
+
+### Healthcheck
+- `GET /api/v1/healthcheck/` — Healthcheck endpoint
 
 ## Models
 
@@ -139,5 +197,4 @@ Server will start on the port specified in `.env` (default: 8000).
 ## License
 ISC
 
----
-*Generated by GitHub Copilot*
+
