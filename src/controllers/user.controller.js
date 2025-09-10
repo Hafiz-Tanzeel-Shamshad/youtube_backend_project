@@ -267,7 +267,7 @@ const updateUserAvatarImage = asyncHandler(async (req, res) => {
     }
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    // delete old avatar image
+    // Todo: delete old avatar image
     if(!avatar.url){
         throw new ApiError(400,"Error while uploading on avatar image");
     }
