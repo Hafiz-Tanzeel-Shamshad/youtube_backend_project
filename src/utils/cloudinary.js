@@ -16,7 +16,8 @@ const uploadOnCloudinary = async(localFilePath)=>{
         //upload the file on cloudinary
        const response = await cloudinary.uploader.upload(localFilePath,{
             resource_type: "auto",
-            folder: "youtube_images"
+            folder: "youtube_images",
+            media_metadata: true, // 
         })
         // file has been uploaded successfully
         console.log("file is uploaded successfully", response.secure_url);
